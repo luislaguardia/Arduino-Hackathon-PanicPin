@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TAGUIG POLICE OUTPOST</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+        #map {
+            width: 100%;
+            height: 400px;
+            margin-top: 20px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h2>Panic Pin - Authority Side</h2>
+    <p id="output">Waiting for distress signals...</p>
+    <div id="map"></div>
+
+    <script>
+        let map;
+        let markers = [];
+
+        function initializeMap() {
+            map = L.map('map').setView([14.52, 121.05], 12);  // Default view (Taguig)
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+        }
+
+        function fetchSOS() {
+            fetch("http://localhost:5001/get_sos")
+                .then(response => response.json())
+                .then(sosList => {
+                    if (sosList.length > 0) {
+                        document.getElementById("output").innerHTML = `🚨 ${sosList.length} distress signals received!`;
+                        updateMap(sosList);
+                    } else {
+                        document.getElementById("output").innerHTML = " No active distress signals.";
+                    }
+                })
+                .catch(error => console.log(" Error fetching SOS data.", error));
+        }
+
+        function updateMap(sosList) {
+            document.getElementById("map").style.display = "block";
+
+            // Remove existing markers before updating
+            markers.forEach(marker => map.removeLayer(marker));
+            markers = [];
+
+            // Add new markers for each distress signal
+            sosList.forEach(sos => {
+                let marker = L.marker([sos.lat, sos.lon])
+                    .addTo(map)
+                    .bindPopup(`<b>${sos.user_id}</b><br>Location: ${sos.lat}, ${sos.lon}`)
+                    .openPopup();
+                markers.push(marker);
+            });
+
+            // Auto-zoom to fit all markers
+            // let bounds = new L.LatLngBounds(sosList.map(sos => [sos.lat, sos.lon]));
+            // map.fitBounds(bounds);
+        }
+
+        initializeMap();
+        setInterval(fetchSOS, 5001);
+        fetchSOS();
+    </script>
+</body>
+</html>

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panic Pin - User</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+        #map {
+            width: 100%;
+            height: 300px;
+            margin-top: 20px;
+            display: none;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 18px;
+            background-color: red;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h2>Panic Pin - User 2</h2>
+    <p id="output">Please wait...</p>
+    <button onclick="sendSOS()">Send SOS</button>
+    <div id="map"></div>
+
+    <script>
+        const USER_ID = "user2";  // Change to "user2" or "user3" for different users
+
+        let userLocation = { lat: null, lon: null };
+
+        function getAccurateLocation() {
+            if (!navigator.geolocation) {
+                document.getElementById("output").innerHTML = "Geolocation is not supported by your browser.";
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    userLocation.lat = position.coords.latitude;
+                    userLocation.lon = position.coords.longitude;
+                    document.getElementById("output").innerHTML = `Location: ${userLocation.lat}, ${userLocation.lon}`;
+                    showMap(userLocation.lat, userLocation.lon);
+                },
+                () => {
+                    document.getElementById("output").innerHTML = "Error: Unable to retrieve location.";
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                }
+            );
+        }
+
+        function showMap(lat, lon) {
+            document.getElementById("map").style.display = "block";
+            document.getElementById("map").innerHTML = 
+                `<iframe width="100%" height="300" frameborder="0" style="border:0" 
+                    src="https://www.google.com/maps?q=${lat},${lon}&output=embed">
+                </iframe>`;
+        }
+
+        function sendSOS() {
+            if (userLocation.lat && userLocation.lon) {
+                fetch("http://localhost:5001/sos", {  // Change to port 5001
+                method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        user_id: USER_ID,
+                        lat: userLocation.lat,
+                        lon: userLocation.lon
+                    })
+                })
+                .then(response => response.json())
+                .then(data => alert("SOS sent successfully!"))
+                .catch(error => alert("Error sending SOS."));
+            } else {
+                alert("Unable to get location. Try again.");
+            }
+        }
+
+        setInterval(getAccurateLocation, 10000);
+        getAccurateLocation();
+    </script>
+</body>
+</html>
