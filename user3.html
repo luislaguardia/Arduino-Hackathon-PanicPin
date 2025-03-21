@@ -3,38 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panic Pin - User</title>
+    <title>User 3</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             text-align: center;
             padding: 20px;
+            background-color: #f8f9fa;
+        }
+        #header {
+            margin-bottom: 20px;
+            padding: 10px;
+        }
+        #header img {
+            width: 120px;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+        #output {
+            font-size: 18px;
+            font-weight: bold;
+            color: #444;
+            margin-top: 10px;
+            padding: 10px;
+            background: white;
+        }
+        button {
+            padding: 12px 24px;
+            font-size: 18px;
+            background: linear-gradient(135deg, red, darkred);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: 0.3s ease-in-out;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        button:hover {
+            background: linear-gradient(135deg, darkred, black);
+            transform: scale(1.05);
         }
         #map {
             width: 100%;
-            height: 300px;
+            height: 530px;
             margin-top: 20px;
             display: none;
-        }
-        button {
-            padding: 10px 20px;
-            font-size: 18px;
-            background-color: red;
-            color: white;
-            border: none;
-            cursor: pointer;
-            margin-top: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            transition: 0.3s ease-in-out;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+            border: 4px solid #2d2f31;
         }
     </style>
 </head>
 <body>
-    <h2>Panic Pin - User 3</h2>
+    <div id="header">
+        <img src="userheader.png" alt="Panic Pin Logo">
+    </div>
+
     <p id="output">Please wait...</p>
     <button onclick="sendSOS()">Send SOS</button>
     <div id="map"></div>
 
     <script>
-        const USER_ID = "user3";  // Change to "user2" or "user3" for different users
+        const USER_ID = "user3";  
 
         let userLocation = { lat: null, lon: null };
 
@@ -65,14 +99,14 @@
         function showMap(lat, lon) {
             document.getElementById("map").style.display = "block";
             document.getElementById("map").innerHTML = 
-                `<iframe width="100%" height="300" frameborder="0" style="border:0" 
+                `<iframe width="100%" height="530" frameborder="0" style="border:0; border-radius: 10px;" 
                     src="https://www.google.com/maps?q=${lat},${lon}&output=embed">
                 </iframe>`;
         }
 
         function sendSOS() {
             if (userLocation.lat && userLocation.lon) {
-                fetch("http://localhost:5001/sos", {  // Change to port 5001                    
+                fetch("http://localhost:5001/sos", {                   
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
@@ -85,7 +119,7 @@
                 .then(data => alert("SOS sent successfully!"))
                 .catch(error => alert("Error sending SOS."));
             } else {
-                alert("📍 Unable to get location. Try again.");
+                alert("Unable to get location. Try again.");
             }
         }
 
@@ -93,4 +127,6 @@
         getAccurateLocation();
     </script>
 </body>
+<button id="connectBtn">Connect to ESP32 Bluetooth</button>
+<script src="web.js"></script>
 </html>

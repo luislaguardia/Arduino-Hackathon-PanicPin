@@ -8,21 +8,63 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
             text-align: center;
-            padding: 20px;
+            padding: 0;
+            margin: 0;
+            background-color: #f4f6f9;
         }
+
+        #header-img {
+            width: auto;
+            height: 140px;
+            display: block;
+            margin: 20px auto 10px auto;
+        }
+
+        #output {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+            margin: 15px auto;
+            padding: 10px 20px;
+            background: white;
+            border-left: 5px solid #dc3545;
+            border-radius: 5px;
+            width: fit-content;
+            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Map Styling */
         #map {
-            width: 100%;
-            height: 400px;
-            margin-top: 20px;
-            display: none;
+            width: 90%;
+            height: 500px;
+            margin: 20px auto;
+            border-radius: 15px;
+            overflow: hidden;
+            transition: 0.3s ease-in-out;
+            box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.2);
+            border: 5px solid #007bff;
+        }
+
+        @media (max-width: 768px) {
+            #map {
+                width: 95%;
+                height: 450px;
+            }
+
+            #output {
+                font-size: 18px;
+            }
         }
     </style>
 </head>
 <body>
-    <h2>Panic Pin - Authority Side</h2>
+
+    <img id="header-img" src="authority.png" alt="Police Logo">
+
     <p id="output">Waiting for distress signals...</p>
+
     <div id="map"></div>
 
     <script>
@@ -30,7 +72,7 @@
         let markers = [];
 
         function initializeMap() {
-            map = L.map('map').setView([14.52, 121.05], 12);  // Default view (Taguig)
+            map = L.map('map').setView([14.52, 121.05], 12); // default view ito sa taguig naka set
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; OpenStreetMap contributors'
             }).addTo(map);
@@ -44,35 +86,38 @@
                         document.getElementById("output").innerHTML = `🚨 ${sosList.length} distress signals received!`;
                         updateMap(sosList);
                     } else {
-                        document.getElementById("output").innerHTML = " No active distress signals.";
+                        document.getElementById("output").innerHTML = "No active distress signals.";
                     }
                 })
-                .catch(error => console.log(" Error fetching SOS data.", error));
+                .catch(error => console.log("Error fetching SOS data.", error));
         }
 
         function updateMap(sosList) {
-            document.getElementById("map").style.display = "block";
+            if (!map) return;
 
-            // Remove existing markers before updating
             markers.forEach(marker => map.removeLayer(marker));
             markers = [];
 
-            // Add new markers for each distress signal
+            let bounds = new L.LatLngBounds();
+
             sosList.forEach(sos => {
                 let marker = L.marker([sos.lat, sos.lon])
                     .addTo(map)
                     .bindPopup(`<b>${sos.user_id}</b><br>Location: ${sos.lat}, ${sos.lon}`)
                     .openPopup();
                 markers.push(marker);
+                bounds.extend([sos.lat, sos.lon]);
             });
 
-            // Auto-zoom to fit all markers
-            // let bounds = new L.LatLngBounds(sosList.map(sos => [sos.lat, sos.lon]));
-            // map.fitBounds(bounds);
+            if (sosList.length === 1) {
+                map.setView([sosList[0].lat, sosList[0].lon], 16);
+            } else {
+                map.fitBounds(bounds, { padding: [50, 50] });
+            }
         }
 
         initializeMap();
-        setInterval(fetchSOS, 5001);
+        setInterval(fetchSOS, 5000);
         fetchSOS();
     </script>
 </body>
