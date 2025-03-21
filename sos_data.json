@@ -1,12 +1,12 @@
 [
     {
-        "user_id": "user3",
-        "lat": 14.5332954,
-        "lon": 121.0596238
+        "user_id": "Juan Dela Cruz",
+        "lat": 14.5332753,
+        "lon": 121.0596357
     },
     {
-        "user_id": "user1",
-        "lat": 14.5339140,
-        "lon": 121.0596215
+        "user_id": "Luis Laguardia",
+        "lat": 14.5332898,
+        "lon": 121.0596292
     }
 ]

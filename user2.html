@@ -3,130 +3,184 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User 2</title>
+    <title>SOS Emergency</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body {
             font-family: Arial, sans-serif;
+            background: #f8f9fa;
             text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 100%;
+            max-width: 400px;
+            margin: auto;
             padding: 20px;
-            background-color: #f8f9fa;
         }
-        #header {
-            margin-bottom: 20px;
+        .profile {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             padding: 10px;
         }
-        #header img {
-            width: 120px;
-            height: auto;
-            display: block;
-            margin: 0 auto;
+        .profile img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
         }
-        #output {
-            font-size: 18px;
-            font-weight: bold;
-            color: #444;
-            margin-top: 10px;
-            padding: 10px;
-            background: white;
-        }
-        button {
-            padding: 12px 24px;
-            font-size: 18px;
-            background: linear-gradient(135deg, red, darkred);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
+        .sos-section {
             margin-top: 20px;
-            transition: 0.3s ease-in-out;
+        }
+        .sos-btn {
+            width: 150px;
+            height: 150px;
+            background: red;
+            border-radius: 50%;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+            margin: auto;
+            position: relative;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+        .sos-btn:hover {
+            background: darkred;
+            transform: scale(1.1);
+        }
+        .address {
+            background: white;
+            padding: 10px;
+            margin-top: 20px;
+            border-radius: 10px;
             box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
         }
-        button:hover {
-            background: linear-gradient(135deg, darkred, black);
-            transform: scale(1.05);
-        }
-        #map {
+        .navbar {
+            display: flex;
+            justify-content: space-around;
+            padding: 10px;
+            background: white;
+            position: fixed;
+            bottom: 0;
             width: 100%;
-            height: 530px;
-            margin-top: 20px;
+            max-width: 400px;
+            box-shadow: 0px -2px 8px rgba(0, 0, 0, 0.2);
+        }
+        .navbar a {
+            text-decoration: none;
+            color: black;
+            font-size: 16px;
+        }
+        #sos-message {
             display: none;
-            border-radius: 10px;
-            overflow: hidden;
-            transition: 0.3s ease-in-out;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
-            border: 4px solid #2d2f31;
+            font-size: 18px;
+            font-weight: bold;
+            color: #d9534f;
+            margin-bottom: 10px;
         }
     </style>
 </head>
 <body>
-    <div id="header">
-        <img src="userheader.png" alt="Panic Pin Logo">
+    <div class="container" id="home">
+        <div class="profile">
+            <div>
+                <p>Welcome back, <strong>Juan Dela Cruz</strong></p>
+            </div>
+            <img src="user2profile.jpg" alt="Profile Picture">
+        </div>
+        <div class="sos-section">
+            <h2><strong>Are you in emergency?</strong></h2>
+            <p>Press the button below, help will reach you soon.</p>
+            <div class="sos-btn" onclick="sendSOS()">SOS</div>
+        </div>
+        <div class="address">
+            <p><strong>Your current address</strong></p>
+            <p id="location">Fetching location...</p>
+        </div>
+    </div>
+    
+    <div class="container" id="map" style="display:none;">
+        <p id="sos-message" style="display: none;">Help is on the way!<br>Your emergency location has been sent.</p>
+        <iframe id="mapFrame" width="100%" height="400px" style="border:0;"></iframe>
+    </div>
+    
+    <div class="container" id="profile" style="display:none;">
+        <h2>User Profile</h2>
+        <p><strong>Name:</strong> Juan Dela Cruz</p>
+        <p><strong>Email:</strong> juandc@example.com</p>
+        <p><strong>Phone:</strong> +63 912 987 6543</p>
     </div>
 
-    <p id="output">Please wait...</p>
-    <button onclick="sendSOS()">Send SOS</button>
-    <div id="map"></div>
+    <div class="navbar">
+        <a href="#" onclick="showPage('home')"><i class="fa fa-home"></i> Home</a>
+        <a href="#" onclick="showPage('map')"><i class="fa fa-map"></i> Map</a>
+        <a href="#" onclick="showPage('profile')"><i class="fa fa-user"></i> Profile</a>
+    </div>
 
     <script>
-        const USER_ID = "user2";  
-
         let userLocation = { lat: null, lon: null };
 
-        function getAccurateLocation() {
-            if (!navigator.geolocation) {
-                document.getElementById("output").innerHTML = "Geolocation is not supported by your browser.";
-                return;
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        userLocation.lat = position.coords.latitude;
+                        userLocation.lon = position.coords.longitude;
+                        document.getElementById("location").innerText = 
+                            userLocation.lat + ", " + userLocation.lon;
+                        document.getElementById("mapFrame").src = 
+                            `https://maps.google.com/maps?q=${userLocation.lat},${userLocation.lon}&z=15&output=embed`;
+                    },
+                    () => {
+                        document.getElementById("location").innerText = "Unable to get location.";
+                    }
+                );
             }
-
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    userLocation.lat = position.coords.latitude;
-                    userLocation.lon = position.coords.longitude;
-                    document.getElementById("output").innerHTML = `Location: ${userLocation.lat}, ${userLocation.lon}`;
-                    showMap(userLocation.lat, userLocation.lon);
-                },
-                () => {
-                    document.getElementById("output").innerHTML = "Error: Unable to retrieve location.";
-                },
-                {
-                    enableHighAccuracy: true,
-                    timeout: 10000,
-                    maximumAge: 0
-                }
-            );
-        }
-
-        function showMap(lat, lon) {
-            document.getElementById("map").style.display = "block";
-            document.getElementById("map").innerHTML = 
-                `<iframe width="100%" height="530" frameborder="0" style="border:0; border-radius: 10px;" 
-                    src="https://www.google.com/maps?q=${lat},${lon}&output=embed">
-                </iframe>`;
         }
 
         function sendSOS() {
             if (userLocation.lat && userLocation.lon) {
-                fetch("http://localhost:5001/sos", {                   
+                const sosData = {
+                    user_id: "Juan Dela Cruz",
+                    lat: userLocation.lat,
+                    lon: userLocation.lon
+                };
+
+                fetch("http://localhost:5001/sos", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        user_id: USER_ID,
-                        lat: userLocation.lat,
-                        lon: userLocation.lon
-                    })
+                    body: JSON.stringify(sosData)
                 })
                 .then(response => response.json())
-                .then(data => alert("SOS sent successfully!"))
-                .catch(error => alert("Error sending SOS."));
+                .then(data => {
+                    console.log("SOS sent successfully:", data);
+                    document.getElementById("sos-message").style.display = "block";
+                    showPage('map'); 
+                })
+                .catch(error => {
+                    console.error("Error sending SOS:", error);
+                    alert("Failed to send SOS. Please try again.");
+                });
             } else {
                 alert("Unable to get location. Try again.");
             }
         }
 
-        setInterval(getAccurateLocation, 10000);
-        getAccurateLocation();
+        function showPage(page) {
+            document.getElementById('home').style.display = 'none';
+            document.getElementById('map').style.display = 'none';
+            document.getElementById('profile').style.display = 'none';
+            
+            document.getElementById(page).style.display = 'block';
+        }
+
+        getLocation();
     </script>
 </body>
-<button id="connectBtn">Connect to ESP32 Bluetooth</button>
-<script src="web.js"></script>
 </html>
